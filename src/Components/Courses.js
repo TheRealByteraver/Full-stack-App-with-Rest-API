@@ -19,7 +19,10 @@ export default function Courses() {
         setCourses(response); 
         return response;
       })
-      .then(() => console.log('courses: ', courses))
+      // the debug code below will cause a dependencies warning from React
+      // because we use the variable 'courses' without specifying it in the
+      // dependencies array
+      // .then(() => console.log('courses: ', courses))
       .catch(error => console.log('Error fetching api: ', error));  
   }, []);
 
@@ -30,7 +33,6 @@ export default function Courses() {
         ? courses.map(course => <Course key={course.id} title={course.title} />)
         : <h1>Loading...</h1>
       }
-
 
       <a className="course--module course--add--module" href="create-course.html">
         <span className="course--add--title">
