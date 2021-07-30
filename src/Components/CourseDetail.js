@@ -1,4 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import {
+  // BrowserRouter as Router,
+  // Switch,
+  // Route,
+  // Link,
+  useParams
+} from "react-router-dom";
 
 // CourseDetail - This component provides the "Course Detail" screen by 
 // retrieving the detail for a course from the REST API's /api/courses/:id 
@@ -12,8 +19,11 @@ export default function CourseDetail(props) {
 
   const [course, setCourse] = useState([]);
 
+  const { id } = useParams();
+
   useEffect(() => {
-    fetch(`http://localhost:5000/api/courses/${props.id}`)
+    // console.log('props.id inside <CourseDetail />: ', id); // ok
+    fetch(`http://localhost:5000/api/courses/${id}`)
       .then(response => {
         if(response.ok) {
           return Promise.resolve(response);
@@ -31,7 +41,7 @@ export default function CourseDetail(props) {
       // dependencies array
       // .then(() => console.log('course: ', course))
       .catch(error => console.log('Error fetching api: ', error));  
-  }, [props.id]);
+  }, [id]);
 
   function getCourseJSX(course) {
 
@@ -89,9 +99,9 @@ export default function CourseDetail(props) {
         </div>
       </div>      
       {
-        (course.id === props.id) 
+        (course.id === id) 
           ? getCourseJSX(course)
-          : <h1>Loading...</h1>
+          : <h1>Loading course {id}...</h1>
       }
     </main>
   );
