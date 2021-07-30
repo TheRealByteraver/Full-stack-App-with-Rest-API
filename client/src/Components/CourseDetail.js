@@ -15,14 +15,13 @@ import {
 // renders an "Update Course" button for navigating to the "Update Course" 
 // screen.
 
-export default function CourseDetail(props) {
+export default function CourseDetail() {
 
   const [course, setCourse] = useState([]);
-
   const { id } = useParams();
 
   useEffect(() => {
-    // console.log('props.id inside <CourseDetail />: ', id); // ok
+    // console.log('id inside <CourseDetail />: ', id); // ok
     fetch(`http://localhost:5000/api/courses/${id}`)
       .then(response => {
         if(response.ok) {
@@ -44,6 +43,8 @@ export default function CourseDetail(props) {
   }, [id]);
 
   function getCourseJSX(course) {
+    console.log('course var inside getCourseJSX(course): ', course);
+    console.log(`(${course.id} === ${id}): `, (course.id === id));
 
     // split up the course description into separate paragraphs
     const description = course.description 
@@ -99,7 +100,7 @@ export default function CourseDetail(props) {
         </div>
       </div>      
       {
-        (course.id === id) 
+        (course.id && (course.id === id)) // undefined === undefined yields true :(
           ? getCourseJSX(course)
           : <h1>Loading course {id}...</h1>
       }
