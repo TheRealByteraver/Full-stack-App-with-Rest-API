@@ -34,10 +34,10 @@ function App() {
 
         <Route path="/courses/:id" component={CourseDetail} />
 
-        {/* <Route path="/courses/:id/update" component={UpdateCourse} /> */}
-        {/* <Route path="/courses/signin" component={UserSignIn} /> */}
-        {/* <Route path="/courses/signup" component={UserSignUp} /> */}
-        {/* <Route path="/courses/signout" component={UserSignOut} /> */}
+        <Route path="/courses/:id/update" component={UpdateCourse} /> */} 
+        <Route path="/courses/signin" component={UserSignIn} />
+        <Route path="/courses/signup" component={UserSignUp} />
+        {/* <Route path="/courses/signout" component={UserSignOut} /> /*}
 
         {/* <Courses /> */}
         {/* <CourseDetail id={1} /> */}

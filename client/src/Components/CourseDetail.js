@@ -3,7 +3,7 @@ import {
   // BrowserRouter as Router,
   // Switch,
   // Route,
-  // Link,
+  Link,
   useParams
 } from "react-router-dom";
 
@@ -18,10 +18,10 @@ import {
 export default function CourseDetail() {
 
   const [course, setCourse] = useState([]);
+  const [fetchErrorOccured, setFetchError] = useState(false);  
   const { id } = useParams();
 
   useEffect(() => {
-    // console.log('id inside <CourseDetail />: ', id); // ok
     fetch(`http://localhost:5000/api/courses/${id}`)
       .then(response => {
         if(response.ok) {
@@ -39,12 +39,14 @@ export default function CourseDetail() {
       // because we use the variable 'course' without specifying it in the
       // dependencies array
       // .then(() => console.log('course: ', course))
-      .catch(error => console.log('Error fetching api: ', error));  
-  }, [id]);
+      // .catch(error => console.log('Error fetching api: ', error));  
+      .catch(error => {
+        setFetchError(true);
+        console.log('Error fetching api: ', error);
+      });  
+}, [id]);
 
   function getCourseJSX(course) {
-    console.log('course var inside getCourseJSX(course): ', course);
-    console.log(`(${course.id} === ${id}): `, (course.id === id));
 
     // split up the course description into separate paragraphs
     const description = course.description 
@@ -90,19 +92,34 @@ export default function CourseDetail() {
     );
   }
 
+  function getLoadingMsg(fetchErrorOccured) {
+    // console.log('course.id: ', course.id);
+    // console.log('id from useParams: ', id);
+    // console.log('(course.id === id): ', course.id === id);
+    // console.log('(course.id && (course.id === id)) = ', (course.id && (course.id === id)));
+    // console.log('typeof course.id: ', typeof course.id);
+    // console.log('typeof id: ', typeof id);
+    // console.log('************************************');
+    // return <h1>Loading course nr {id}...</h1>;
+    return (fetchErrorOccured)
+    ? <h1>An error occured while fetching data from the backend, please try again later.</h1>
+    : <h1>Loading...</h1>;    
+  }
+
   return (
     <main>
       <div className="actions--bar">
         <div className="wrap">
-          <a className="button" href="update-course.html">Update Course</a>
-          <a className="button" href="#">Delete Course</a>
-          <a className="button button-secondary" href="index.html">Return to List</a>
+          <Link className="button" to="update-course.html">Update Course</Link>
+          <Link className="button" to="#">Delete Course</Link>
+          <Link className="button button-secondary" to="/">Return to List</Link>
         </div>
       </div>      
       {
-        (course.id && (course.id === id)) // undefined === undefined yields true :(
+        (course.id && (course.id === +id)) // "undefined === undefined" yields true :(
+        //course
           ? getCourseJSX(course)
-          : <h1>Loading course {id}...</h1>
+          : getLoadingMsg(fetchErrorOccured)            
       }
     </main>
   );
