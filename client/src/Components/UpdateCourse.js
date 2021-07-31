@@ -1,4 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import {
+  // BrowserRouter as Router,
+  // Switch,
+  // Route,
+  // Link,
+  useParams
+} from "react-router-dom";
 
 // UpdateCourse - This component provides the "Update Course" screen by 
 // rendering a form that allows a user to update one of their existing 
@@ -7,12 +14,14 @@ import React, { useState, useEffect } from 'react';
 // This component also renders a "Cancel" button that returns the user to 
 // the "Course Detail" screen.
 
-export default function UpdateCourse(props) {
+export default function UpdateCourse() {
 
   const [course, setCourse] = useState([]);
+  const [fetchErrorOccured, setFetchError] = useState(false);  
+  const { id } = useParams();
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/courses/${props.id}`)
+    fetch(`http://localhost:5000/api/courses/${id}`)
       .then(response => {
         if(response.ok) {
           return Promise.resolve(response);
@@ -29,8 +38,11 @@ export default function UpdateCourse(props) {
       // because we use the variable 'course' without specifying it in the
       // dependencies array
       // .then(() => console.log('course: ', course))
-      .catch(error => console.log('Error fetching api: ', error));  
-  }, [props.id]);
+      .catch(error => {
+        setFetchError(true);
+        console.log('Error fetching api: ', error);
+      });  
+  }, [id]);
 
 
   function getCourseJSX(course) {
@@ -60,6 +72,12 @@ export default function UpdateCourse(props) {
     // location.href='index.html';
   }
 
+  function getLoadingMsg(fetchErrorOccured) {
+    return (fetchErrorOccured)
+    ? <h1>An error occured while fetching data from the backend, please try again later.</h1>
+    : <h1>Loading...</h1>;    
+  }  
+
   return (
     <main>
       <div className="wrap">
@@ -67,9 +85,12 @@ export default function UpdateCourse(props) {
         <form>
           <div className="main--flex">
             {
-              (course.id === props.id) 
+              // "undefined === undefined" yields true :(
+              // also 'id' is a string and course.id is a number, hence the "+id":
+              (course.id && (course.id === +id)) 
+              //course
                 ? getCourseJSX(course)
-                : <h1>Loading...</h1>
+                : getLoadingMsg(fetchErrorOccured)
             } 
           </div>
           <button className="button" type="submit">Update Course</button>

@@ -26,7 +26,7 @@ export default function UserSignIn() {
           <button className="button" type="submit">Sign In</button>
           <button className="button button-secondary" onClick={handleClick}>Cancel</button>
         </form>
-        <p>Don't have a user account? Click here to <a href="sign-up.html">sign up</a>!</p>          
+        <p>Don't have a user account? Click here to <a href="/signup">sign up</a>!</p>          
       </div>
     </main>
   );

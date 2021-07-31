@@ -30,21 +30,12 @@ function App() {
       <Header />
       <Switch>
         <Route exact path="/" component={Courses} />
+        <Route path="/signin" component={UserSignIn} />
+        <Route path="/signup" component={UserSignUp} />
         <Route path="/courses/create" component={CreateCourse} />
-
-        <Route path="/courses/:id" component={CourseDetail} />
-
-        <Route path="/courses/:id/update" component={UpdateCourse} /> */} 
-        <Route path="/courses/signin" component={UserSignIn} />
-        <Route path="/courses/signup" component={UserSignUp} />
-        {/* <Route path="/courses/signout" component={UserSignOut} /> /*}
-
-        {/* <Courses /> */}
-        {/* <CourseDetail id={1} /> */}
-        {/* <UserSignIn /> */}
-        {/* <UserSignUp /> */}
-        {/* <CreateCourse /> */}
-        {/* <UpdateCourse id={1}/> */}
+        <Route exact path="/courses/:id" component={CourseDetail} />
+        <Route path="/courses/:id/update" component={UpdateCourse} />  
+        {/* <Route path="/signout" component={UserSignOut} /> */}
 
         <Route component={ () =>
               <h1>404 - The requested route is not available</h1> } />

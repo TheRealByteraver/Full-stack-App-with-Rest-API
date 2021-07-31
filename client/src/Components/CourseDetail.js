@@ -93,14 +93,6 @@ export default function CourseDetail() {
   }
 
   function getLoadingMsg(fetchErrorOccured) {
-    // console.log('course.id: ', course.id);
-    // console.log('id from useParams: ', id);
-    // console.log('(course.id === id): ', course.id === id);
-    // console.log('(course.id && (course.id === id)) = ', (course.id && (course.id === id)));
-    // console.log('typeof course.id: ', typeof course.id);
-    // console.log('typeof id: ', typeof id);
-    // console.log('************************************');
-    // return <h1>Loading course nr {id}...</h1>;
     return (fetchErrorOccured)
     ? <h1>An error occured while fetching data from the backend, please try again later.</h1>
     : <h1>Loading...</h1>;    
@@ -110,13 +102,15 @@ export default function CourseDetail() {
     <main>
       <div className="actions--bar">
         <div className="wrap">
-          <Link className="button" to="update-course.html">Update Course</Link>
+          <Link className="button" to={`/courses/${id}/update`}>Update Course</Link>
           <Link className="button" to="#">Delete Course</Link>
           <Link className="button button-secondary" to="/">Return to List</Link>
         </div>
       </div>      
       {
-        (course.id && (course.id === +id)) // "undefined === undefined" yields true :(
+        // "undefined === undefined" yields true :(
+        // also 'id' is a string and course.id is a number, hence the "+id":
+        (course.id && (course.id === +id)) 
         //course
           ? getCourseJSX(course)
           : getLoadingMsg(fetchErrorOccured)            
