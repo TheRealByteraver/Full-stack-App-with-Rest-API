@@ -5,11 +5,13 @@ import {
 } from 'react-router-dom';
 
 // own imports:
+import { Provider } from './Components/Context';
 import Header from './Components/Header';
 import Courses from './Components/Courses';
 import CourseDetail from './Components/CourseDetail';
 import UserSignIn from './Components/UserSignIn';
 import UserSignUp from './Components/UserSignUp';
+import UserSignOut from './Components/UserSignOut';
 import CreateCourse from './Components/CreateCourse';
 import UpdateCourse from './Components/UpdateCourse';
 
@@ -26,21 +28,23 @@ import UpdateCourse from './Components/UpdateCourse';
 function App() {
 
   return (
-    <BrowserRouter>
-      <Header />
-      <Switch>
-        <Route exact path="/" component={Courses} />
-        <Route path="/signin" component={UserSignIn} />
-        <Route path="/signup" component={UserSignUp} />
-        <Route path="/courses/create" component={CreateCourse} />
-        <Route exact path="/courses/:id" component={CourseDetail} />
-        <Route path="/courses/:id/update" component={UpdateCourse} />  
-        {/* <Route path="/signout" component={UserSignOut} /> */}
+    <Provider>
+      <BrowserRouter>
+        <Header />
+        <Switch>
+          <Route exact path="/" component={Courses} />
+          <Route path="/signin" component={UserSignIn} />
+          <Route path="/signup" component={UserSignUp} />
+          {/* <Route path="/signout" component={UserSignOut} /> */}
+          <Route path="/courses/create" component={CreateCourse} />
+          <Route exact path="/courses/:id" component={CourseDetail} />
+          <Route path="/courses/:id/update" component={UpdateCourse} />  
 
-        <Route component={ () =>
-              <h1>404 - The requested route is not available</h1> } />
-      </Switch>
-    </BrowserRouter>
+          <Route component={ () =>
+                <h1>404 - The requested route is not available</h1> } />
+        </Switch>
+      </BrowserRouter>
+    </Provider>
   );
 }
 
