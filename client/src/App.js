@@ -35,11 +35,10 @@ function App() {
           <Route exact path="/" component={Courses} />
           <Route path="/signin" component={UserSignIn} />
           <Route path="/signup" component={UserSignUp} />
-          {/* <Route path="/signout" component={UserSignOut} /> */}
+          <Route path="/signout" component={UserSignOut} />
           <Route path="/courses/create" component={CreateCourse} />
           <Route exact path="/courses/:id" component={CourseDetail} />
           <Route path="/courses/:id/update" component={UpdateCourse} />  
-
           <Route component={ () =>
                 <h1>404 - The requested route is not available</h1> } />
         </Switch>

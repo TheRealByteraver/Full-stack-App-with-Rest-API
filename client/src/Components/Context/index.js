@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 
 const apiBaseUrl = 'http://localhost:5000/api';
 
-const AuthenticatedUserContext = React.createContext();
+export const AuthenticatedUserContext = React.createContext();
 
 export function Provider(props) {
 
