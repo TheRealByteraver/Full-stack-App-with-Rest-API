@@ -7,7 +7,14 @@ const cookieName = 'authenticatedUser';
 export const AuthenticatedUserContext = React.createContext();
 
 export function Provider(props) {
-
+  /*
+    Example of an authenticatedUser object as returned by the api:
+    {
+      "firstName": "Joe",
+      "lastName": "Smith",
+      "emailAddress": "joe@smith.com"
+    }   
+  */
   const [authenticatedUser, setAuthenticatedUser] = 
     useState(() => {
         const cookie = Cookies.get(cookieName);
@@ -67,9 +74,12 @@ export function Provider(props) {
     const user = await getUser(emailAddress, password);
     if (user !== null) {
       setAuthenticatedUser(() => {
-        return {
-          authenticatedUser: user,
-        };
+        // const newObject = {
+        //   authenticatedUser: user,
+        // };
+        // console.log('Now setting inside Context/index.js authenticatedUser to: ', newObject);
+        // return newObject;
+        return user;
       });
       // Set cookie that will expire after 1 day:
       // docs at https://github.com/js-cookie/js-cookie#expires
@@ -83,9 +93,10 @@ export function Provider(props) {
   const signOut = () => {
     console.log('Signing out user ', authenticatedUser);
     setAuthenticatedUser(() => {       
-      return { 
-        authenticatedUser: null 
-      }
+      // return { 
+      //   authenticatedUser: null 
+      // }
+      return null
     });
     Cookies.remove(cookieName);
   }

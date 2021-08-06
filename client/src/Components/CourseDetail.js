@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { AuthenticatedUserContext } from './Context';
 import {
   // BrowserRouter as Router,
   // Switch,
@@ -17,6 +18,7 @@ import {
 
 export default function CourseDetail() {
 
+  const context = useContext(AuthenticatedUserContext);
   const [course, setCourse] = useState([]);
   const [fetchErrorOccured, setFetchError] = useState(false);  
   const { id } = useParams();
@@ -98,12 +100,31 @@ export default function CourseDetail() {
     : <h1>Loading...</h1>;    
   }
 
+  // The following function shows the 'Update Course' and 'Delete Course' 
+  // buttons, but only if:
+  //   - The user is signed in
+  //   - The user is editing his own course
+  function showEditButtons() {
+    const courseLoaded = (course.id && (course.id === +id));
+    const { authenticatedUser } = context;
+    if (courseLoaded && authenticatedUser) {
+      if (course.courseUser.emailAddress === authenticatedUser.emailAddress) {
+        return (
+          <>
+            <Link className="button" to={`/courses/${id}/update`}>Update Course</Link>
+            <Link className="button" to="#">Delete Course</Link>
+          </>                    
+        );
+      }
+    }
+    return null;
+  }
+
   return (
     <main>
       <div className="actions--bar">
         <div className="wrap">
-          <Link className="button" to={`/courses/${id}/update`}>Update Course</Link>
-          <Link className="button" to="#">Delete Course</Link>
+          { showEditButtons() }
           <Link className="button button-secondary" to="/">Return to List</Link>
         </div>
       </div>      

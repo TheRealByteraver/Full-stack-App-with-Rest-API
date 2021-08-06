@@ -67,7 +67,7 @@ export default function UpdateCourse() {
     );
   }
 
-  function handleClick(event) {
+  function handleCancel(event) {
     event.preventDefault(); 
     // location.href='index.html';
   }
@@ -94,7 +94,7 @@ export default function UpdateCourse() {
             } 
           </div>
           <button className="button" type="submit">Update Course</button>
-          <button className="button button-secondary" onClick={handleClick}>Cancel</button>
+          <button className="button button-secondary" onClick={handleCancel}>Cancel</button>
         </form>
       </div>
     </main>

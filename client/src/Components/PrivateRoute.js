@@ -7,12 +7,12 @@ import {
 
 export default function PrivateRoute({ children, ...rest }) {
 
-  const context = useContext(AuthenticatedUserContext); 
+  const { authenticatedUser } = useContext(AuthenticatedUserContext); 
 
   return (
     <Route
       {...rest}
-      render={ props => context.authenticatedUser 
+      render={ props => authenticatedUser //context.authenticatedUser 
         ? children
         : <Redirect to={{
             pathname: "/signin",
