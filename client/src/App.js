@@ -6,6 +6,7 @@ import {
 
 // own imports:
 import { Provider } from './Components/Context';
+import PrivateRoute from './Components/PrivateRoute';
 import Header from './Components/Header';
 import Courses from './Components/Courses';
 import CourseDetail from './Components/CourseDetail';
@@ -33,12 +34,16 @@ function App() {
         <Header />
         <Switch>
           <Route exact path="/" component={Courses} />
+          <PrivateRoute path="/courses/create">
+            <CreateCourse />
+          </PrivateRoute>  
+          <PrivateRoute path="/courses/:id/update">
+            <UpdateCourse />  
+          </PrivateRoute>
+          <Route exact path="/courses/:id" component={CourseDetail} />
           <Route path="/signin" component={UserSignIn} />
           <Route path="/signup" component={UserSignUp} />
           <Route path="/signout" component={UserSignOut} />
-          <Route path="/courses/create" component={CreateCourse} />
-          <Route exact path="/courses/:id" component={CourseDetail} />
-          <Route path="/courses/:id/update" component={UpdateCourse} />  
           <Route component={ () =>
                 <h1>404 - The requested route is not available</h1> } />
         </Switch>

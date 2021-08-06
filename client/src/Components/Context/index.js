@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import Cookies from 'js-cookie';
 
 const apiBaseUrl = 'http://localhost:5000/api';
+const cookieName = 'authenticatedUser';
 
 export const AuthenticatedUserContext = React.createContext();
 
 export function Provider(props) {
 
   const [authenticatedUser, setAuthenticatedUser] = 
-    useState(
-      //Cookies.getJSON('authenticatedUser') || null
-      null
-    );
+    useState(() => {
+        const cookie = Cookies.get(cookieName);
+        return (cookie ? JSON.parse(cookie) : null);
+    });
 
   // helper function to fetch the api with authorization headers 
   // (if applicable)
@@ -45,6 +46,7 @@ export function Provider(props) {
     return fetch(url, options);
   }  
 
+  // helper function to fetch a user using the above api() function
   const getUser = async (emailAddress, password) => {
     const response = await api(
       `/users`, 'GET', null, true, { emailAddress, password });
@@ -59,6 +61,7 @@ export function Provider(props) {
     }
   }  
 
+
   const signIn = async (emailAddress, password) => {
     console.log('calling getUser(', emailAddress, ', ', password, ')');
     const user = await getUser(emailAddress, password);
@@ -70,7 +73,7 @@ export function Provider(props) {
       });
       // Set cookie that will expire after 1 day:
       // docs at https://github.com/js-cookie/js-cookie#expires
-      Cookies.set('authenticatedUser', JSON.stringify(user), { expires: 1 });
+      Cookies.set(cookieName, JSON.stringify(user), { expires: 1 });
     }
     console.log('SignIn() returned the user ', user);
     return user;
@@ -84,7 +87,7 @@ export function Provider(props) {
         authenticatedUser: null 
       }
     });
-    Cookies.remove('authenticatedUser');
+    Cookies.remove(cookieName);
   }
 
   return (

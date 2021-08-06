@@ -1,5 +1,7 @@
-import React from 'react';
-import { Consumer } from './Context';
+import React, { useState, useContext } from 'react';
+import { Consumer, AuthenticatedUserContext } from './Context';
+import Form from './Form';
+import { Link } from 'react-router-dom';
 
 // UserSignIn - This component provides the "Sign In" screen by rendering 
 // a form that allows a user to sign in using their existing account 
@@ -7,49 +9,86 @@ import { Consumer } from './Context';
 // clicked signs in the user and a "Cancel" button that returns the user 
 // to the default route (i.e. the list of courses).
 
-export default function UserSignIn() {
+export default function UserSignIn(props) {
 
-  // const authenticatedUser = useContext(AuthenticatedUserContext);
-  // console.log('authenticatedUser: ', authenticatedUser);
+  const authenticatedUser = useContext(AuthenticatedUserContext);
+
+  const [signInState, setSignInState] = useState({
+    emailAddress: '',
+    password: '',
+    errors: []
+  });  
+
+  function change(event) {
+    // console.log('changing', event.target.name, 'state: ', signInState);
+    const name = event.target.name;
+    const value = event.target.value;
+
+    setSignInState((prevState) => {
+      return {
+        ...prevState,
+        [name]: value
+      };
+    });
+  }        
+
+  function handleCancel() {
+    props.history.push('/');
+  }
+
+  function handleSubmit() {
+    console.log('trying to sign in: ', signInState.emailAddress, ':', signInState.password);
+
+    const { from } = props.location.state || { from: { pathname: '/' } };
+
+    authenticatedUser.actions.signIn(signInState.emailAddress, signInState.password)
+      .then((user) => {
+        if (user === null) {
+          setSignInState(() => {
+            return { errors: [ 'Sign-in was unsuccessful' ] };
+          });
+        } else {
+          props.history.push(from);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        props.history.push('/error');
+      });
+  }
 
   return (
-    <Consumer>
-      { context => {
-        let emailAddress, password;
-        const { actions } = context;
+    <main>
+      <div className="form--centered">
+        <h2>Sign In</h2>       
+        <Form 
+          cancel={handleCancel}
+          errors={signInState.errors}
+          submit={handleSubmit}
+          submitButtonText="Sign In"
+          elements={() => (
+            <React.Fragment>
+              <label htmlFor="emailAddress">Email Address</label>
+              <input 
+                id="emailAddress" 
+                name="emailAddress" 
+                type="email"
+                value={signInState.emailAddress} 
+                onChange={change} 
+                placeholder="email address" />
+              <label htmlFor="password">Password</label>                      
+              <input 
+                id="password" 
+                name="password"
+                type="password"
+                value={signInState.password} 
+                onChange={change} 
+                placeholder="Password" />                
+            </React.Fragment>
+          )} />
 
-        function handleClick(event) {
-          event.preventDefault(); 
-        }
-
-        function handleSubmit(event) {
-          event.preventDefault();
-          console.log('trying to sign in: ', emailAddress.value, ':', password.value);
-          actions.signIn(emailAddress.value, password.value); 
-        }
-
-        return (
-          <main>
-            <div className="form--centered">
-              <h2>Sign In</h2>          
-              <form onSubmit={handleSubmit}>
-                <label htmlFor="emailAddress">Email Address</label>
-                <input id="emailAddress" name="emailAddress" type="email" defaultValue="" 
-                  ref={ (input) => emailAddress = input }
-                />
-                <label htmlFor="password">Password</label>
-                <input id="password" name="password" type="password" defaultValue="" 
-                  ref={ (input) => password = input }
-                />
-                <button className="button" type="submit">Sign In</button>
-                <button className="button button-secondary" onClick={handleClick}>Cancel</button>
-              </form>
-              <p>Don't have a user account? Click here to <a href="/signup">sign up</a>!</p>          
-            </div>
-          </main>
-        );
-        }
-      }
-    </Consumer>
-  );
+        <p>Don't have a user account? <Link to="/signup">Click here</Link> to sign up!</p>
+      </div>
+    </main>
+  );     
 }
