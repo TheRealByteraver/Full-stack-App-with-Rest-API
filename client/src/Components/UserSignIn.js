@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Consumer, AuthenticatedUserContext } from './Context';
+import { AuthenticatedUserContext } from './Context';
 import Form from './Form';
 import { Link } from 'react-router-dom';
 
@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 
 export default function UserSignIn(props) {
 
-  const authenticatedUser = useContext(AuthenticatedUserContext);
+  const context = useContext(AuthenticatedUserContext);
 
   const [signInState, setSignInState] = useState({
     emailAddress: '',
@@ -20,7 +20,6 @@ export default function UserSignIn(props) {
   });  
 
   function change(event) {
-    // console.log('changing', event.target.name, 'state: ', signInState);
     const name = event.target.name;
     const value = event.target.value;
 
@@ -41,11 +40,14 @@ export default function UserSignIn(props) {
 
     const { from } = props.location.state || { from: { pathname: '/' } };
 
-    authenticatedUser.actions.signIn(signInState.emailAddress, signInState.password)
+    context.actions.signIn(signInState.emailAddress, signInState.password)
       .then((user) => {
         if (user === null) {
-          setSignInState(() => {
-            return { errors: [ 'Sign-in was unsuccessful' ] };
+          setSignInState((prevState) => {
+            return { 
+              ...prevState,
+              errors: [ 'Sign-in was unsuccessful' ] 
+            };
           });
         } else {
           props.history.push(from);
@@ -75,7 +77,8 @@ export default function UserSignIn(props) {
                 type="email"
                 value={signInState.emailAddress} 
                 onChange={change} 
-                placeholder="email address" />
+                placeholder="email address" 
+              />
               <label htmlFor="password">Password</label>                      
               <input 
                 id="password" 
@@ -83,7 +86,8 @@ export default function UserSignIn(props) {
                 type="password"
                 value={signInState.password} 
                 onChange={change} 
-                placeholder="Password" />                
+                placeholder="Password" 
+              />                
             </React.Fragment>
           )} />
 

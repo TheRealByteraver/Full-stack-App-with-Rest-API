@@ -1,28 +1,23 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useContext } from 'react';
 import { AuthenticatedUserContext } from './Context';
 import {
-  BrowserRouter,
   Route,
   Redirect,
-  Switch
 } from 'react-router-dom';
 
 export default function PrivateRoute({ children, ...rest }) {
 
   const context = useContext(AuthenticatedUserContext); 
-  // useEffect(() => context.actions.signOut());
 
   return (
     <Route
       {...rest}
-      render={props => context.authenticatedUser ? (
-          children
-        ) : (
-          <Redirect to={{
+      render={ props => context.authenticatedUser 
+        ? children
+        : <Redirect to={{
             pathname: "/signin",
             state: { from: props.location }
           }} />
-        )
       }
     />
   );
