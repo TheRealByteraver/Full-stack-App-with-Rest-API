@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
+import { AuthenticatedUserContext } from './Context';
+import { Link } from 'react-router-dom';
+import Form from './Form';
 
 // UserSignUp - This component provides the "Sign Up" screen by rendering 
 // a form that allows a user to sign up by creating a new account. The 
@@ -7,32 +10,129 @@ import React from 'react';
 // component also renders a "Cancel" button that returns the user to the 
 // default route (i.e. the list of courses).
 
-export default function UserSignUp() {
+export default function UserSignUp(props) {
 
-  function handleClick(event) {
-    event.preventDefault(); 
-    // location.href='index.html';
+  const context = useContext(AuthenticatedUserContext);
+
+  const [signUpState, setSignUpState] = useState({
+    firstName: '',
+    lastName: '',
+    emailAddress: '',
+    passwordValidate: '',
+    password: '',
+    errors: []
+  });  
+
+  function change(event) {
+    const name = event.target.name;
+    const value = event.target.value;
+
+    setSignUpState(prevState => {
+      return {
+        ...prevState,
+        [name]: value
+      };
+    });
+  }        
+
+  function handleCancel() {
+    props.history.push('/');
+  }
+  
+  async function signUp() {
+    console.log('trying to sign up: ', signUpState);
+    const response = await context.actions.api('/users', 'POST', signUpState, false, null);
+    console.log('http response was: ', response.status);
+    if (response.status === 201) {
+      // immediately sign in the user that just signed up
+      console.log('Trying to sign in newly created user ',
+        signUpState.emailAddress, ' with password ', signUpState.password);
+      context.actions.signIn(signUpState.emailAddress, signUpState.password)
+        .then((user) => {
+          if (user === null) {
+            setSignUpState(prevState => ({
+                ...prevState, errors: [ 'Sign-in was unsuccessful' ] }));
+          } else {
+            setSignUpState(prevState => ({ ...prevState, errors: [] }));
+            props.history.push('/');
+          }
+        })
+        .catch((error) => {
+          console.log('Error occured during signin of newly created user: ', error);
+          props.history.push('/error');
+        });
+    }
+    else if (response.status === 400) {
+      const { errors } = await response.json();
+      console.log('Validation error during sign Up: ', errors);
+      setSignUpState(prevState => ({ ...prevState, errors }));
+    }
+    else {
+      // this will not catch problems if the api is unresponsive (not running for example)
+      console.log('API returned an unexpected status code of ', response.status);
+      setSignUpState(prevState => ({
+        ...prevState, errors: [ `Fatal error: API returned an unexpected status code of ${response.status}` ] }));
+    }    
+  }
+
+  function handleSubmit() {
+    signUp();
   }
 
   return (
     <main>
       <div className="form--centered">
         <h2>Sign Up</h2>          
-        <form>
-          <label htmlFor="firstName">First Name</label>
-          <input id="firstName" name="firstName" type="text" defaultValue="" />
-          <label htmlFor="lastName">Last Name</label>
-          <input id="lastName" name="lastName" type="text" defaultValue="" />
-          <label htmlFor="emailAddress">Email Address</label>
-          <input id="emailAddress" name="emailAddress" type="email" defaultValue="" />
-          <label htmlFor="password">Password</label>
-          <input id="password" name="password" type="password" defaultValue="" />
-          <label htmlFor="confirmPassword">Confirm Password</label>
-          <input id="confirmPassword" name="confirmPassword" type="password" defaultValue="" />
-          <button className="button" type="submit">Sign Up</button>
-          <button className="button button-secondary" onClick={handleClick}>Cancel</button>
-        </form>
-        <p>Already have a user account? Click here to <a href="/signin">sign in</a>!</p>
+        <Form
+          cancel={handleCancel}
+          errors={signUpState.errors}
+          submit={handleSubmit}
+          submitButtonText="Sign Up"
+          elements={() => (
+            <>
+              <label htmlFor="firstName">First Name</label>
+              <input 
+                id="firstName" 
+                name="firstName" 
+                type="text"  
+                value={signUpState.firstName}
+                onChange={change}
+              />
+              <label htmlFor="lastName">Last Name</label>
+              <input 
+                id="lastName" 
+                name="lastName" 
+                type="text"  
+                value={signUpState.lastName}
+                onChange={change}
+              />
+              <label htmlFor="emailAddress">Email Address</label>
+              <input 
+                id="emailAddress" 
+                name="emailAddress" 
+                type="email"  
+                value={signUpState.emailAddress}
+                onChange={change}
+              />
+              <label htmlFor="password">Password</label>
+              <input 
+                id="password" 
+                name="password" 
+                type="password"  
+                value={signUpState.password}
+                onChange={change}
+              />
+              {/* <label htmlFor="passwordValidate">Confirm Password</label>
+              <input 
+                id="passwordValidate" 
+                name="passwordValidate" 
+                type="password"  
+                value={signUpState.passwordValidate}
+                onChange={change}
+              /> */}
+            </>
+          )} />
+        <p>Already have a user account? <Link to="/signin">Click here</Link> to sign in!</p>
       </div>
     </main>
   );

@@ -58,7 +58,7 @@ export function Provider(props) {
     const response = await api(
       `/users`, 'GET', null, true, { emailAddress, password });
     if (response.status === 200) {
-      return response.json().then(data => data);
+      return response.json();//.then(data => data);
     }
     else if (response.status === 401) {
       return null;
@@ -68,19 +68,11 @@ export function Provider(props) {
     }
   }  
 
-
   const signIn = async (emailAddress, password) => {
     console.log('calling getUser(', emailAddress, ', ', password, ')');
     const user = await getUser(emailAddress, password);
     if (user !== null) {
-      setAuthenticatedUser(() => {
-        // const newObject = {
-        //   authenticatedUser: user,
-        // };
-        // console.log('Now setting inside Context/index.js authenticatedUser to: ', newObject);
-        // return newObject;
-        return user;
-      });
+      setAuthenticatedUser(() => user);
       // Set cookie that will expire after 1 day:
       // docs at https://github.com/js-cookie/js-cookie#expires
       Cookies.set(cookieName, JSON.stringify(user), { expires: 1 });
@@ -105,6 +97,7 @@ export function Provider(props) {
     <AuthenticatedUserContext.Provider value={{
         authenticatedUser,
         actions: {
+          api,
           signIn,
           signOut
         } 
