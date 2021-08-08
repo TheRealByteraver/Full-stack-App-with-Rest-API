@@ -2,14 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { AuthenticatedUserContext } from './Context';
 import Form from './Form';
 import { withRouter } from "react-router";
-import {
-  // BrowserRouter as Router,
-  // Switch,
-  // Route,
-  // Link,
-  useParams
-} from "react-router-dom";
-
+import { useParams } from "react-router-dom";
 
 // UpdateCourse - This component provides the "Update Course" screen by 
 // rendering a form that allows a user to update one of their existing 
@@ -61,7 +54,7 @@ function UpdateCourse(props) {
       // .then(() => console.log('course: ', course))
       .catch(error => {
         console.log('Error fetching api: ', error);
-      props.history.push('/error'); // todo
+        props.history.push('/error'); // todo
       });  
   }, [id, props.history]);
 

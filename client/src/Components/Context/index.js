@@ -17,6 +17,8 @@ export function Provider(props) {
     We will add the password to that object so we can correctly set
     the auth headers for further api calls
   */
+
+  const [errorMessage, setErrorMessage] = useState('');
   const [authenticatedUser, setAuthenticatedUser] = 
     useState(() => {
         const cookie = Cookies.get(cookieName);
@@ -102,11 +104,13 @@ export function Provider(props) {
 
   return (
     <AuthenticatedUserContext.Provider value={{
+        errorMessage,
         authenticatedUser,
         actions: {
           api,
           signIn,
-          signOut
+          signOut,
+          setErrorMessage
         } 
       }
     }>

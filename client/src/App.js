@@ -1,8 +1,4 @@
-import {
-  BrowserRouter,
-  Route,
-  Switch
-} from 'react-router-dom';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 // own imports:
 import { Provider } from './Components/Context';
@@ -15,6 +11,9 @@ import UserSignUp from './Components/UserSignUp';
 import UserSignOut from './Components/UserSignOut';
 import CreateCourse from './Components/CreateCourse';
 import UpdateCourse from './Components/UpdateCourse';
+import NotFound from './Components/NotFound';
+import Forbidden from './Components/Forbidden';
+import UnhandledError from './Components/UnhandledError';
 
 // Your app should include the following routes, listed in the format 
 // path - component:
@@ -44,8 +43,11 @@ function App() {
           <Route path="/signin" component={UserSignIn} />
           <Route path="/signup" component={UserSignUp} />
           <Route path="/signout" component={UserSignOut} />
-          <Route component={ () =>
-                <h2>404 - The requested route is not available</h2> } />
+
+          <Route path="/forbidden" component={Forbidden} />
+          <Route path="/error" component={UnhandledError} />
+          {/* <Route path="/notfound" component={NotFound} /> */}
+          <Route component={NotFound} />
         </Switch>
       </BrowserRouter>
     </Provider>

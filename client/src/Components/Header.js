@@ -1,15 +1,8 @@
 import React, { useContext } from 'react';
 import { AuthenticatedUserContext } from './Context';
-// import { Link } from 'react-router-dom';
 
 export default function Header() {
   const { authenticatedUser } = useContext(AuthenticatedUserContext); 
-  // console.log('authenticatedUser in <Header />: ', authenticatedUser);
-  // if (authenticatedUser) {
-  //   console.log('authenticatedUser:', authenticatedUser);
-  //   console.log('authenticatedUser.firstName in <Header />: ', authenticatedUser.firstName);
-  //   console.log('authenticatedUser.lastName in <Header />: ', authenticatedUser.lastName); 
-  // }
 
   return (
     <header>

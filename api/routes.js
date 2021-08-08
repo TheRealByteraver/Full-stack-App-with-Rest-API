@@ -16,6 +16,7 @@ function handleSQLErrorOrRethrow(error, response) {
     const errors = error.errors.map(err => err.message);
     response.status(error.status || 400).json({ errors });   
   } else {
+    console.log('Rethrowing the error ', error);
     throw error;
   }
 }
@@ -104,11 +105,11 @@ router.get('/courses/:id', asyncHandler( async (req, res) => {
         }
       ]
     });  
-    // if(course) { // doesn't work, because findAll() throws error if it can't find anything :(
+    if(course[0]) { // doesn't work, because findAll() throws error if it can't find anything :(
       res.status(200).json(filterCourseData(course[0].get({ plain: true })));
-    // } else {
-    //   throwError(404, 'The course you are trying to see does not exist (anymore).🤷‍♂️');
-    // }
+    } else {
+      throwError(404, 'The course you are trying to see does not exist (anymore).🤷‍♂️');
+    }
   } catch(error) {
     //console.log(`GET /courses/${req.params.id} "crashed" the api!`);
     handleSQLErrorOrRethrow(error, res);
