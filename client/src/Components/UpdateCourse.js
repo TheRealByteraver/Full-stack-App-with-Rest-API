@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { AuthenticatedUserContext } from './Context';
+import Form from './Form';
+import { withRouter } from "react-router";
 import {
   // BrowserRouter as Router,
   // Switch,
@@ -7,6 +10,7 @@ import {
   useParams
 } from "react-router-dom";
 
+
 // UpdateCourse - This component provides the "Update Course" screen by 
 // rendering a form that allows a user to update one of their existing 
 // courses. The component also renders an "Update Course" button that when 
@@ -14,10 +18,23 @@ import {
 // This component also renders a "Cancel" button that returns the user to 
 // the "Course Detail" screen.
 
-export default function UpdateCourse() {
+function UpdateCourse(props) {
 
-  const [course, setCourse] = useState([]);
-  const [fetchErrorOccured, setFetchError] = useState(false);  
+  const context = useContext(AuthenticatedUserContext);
+
+  const [course, setCourse] = useState({
+    courseTitle: '',
+    courseDescription: '',
+    estimatedTime: '',
+    materialsNeeded: '',
+    courseUser: {
+      firstName: '',
+      lastName: '',
+      emailAddress: ''
+    },
+    errors: []
+  }); 
+
   const { id } = useParams();
 
   useEffect(() => {
@@ -31,7 +48,11 @@ export default function UpdateCourse() {
       })
       .then(response => response.json())
       .then(response => { 
-        setCourse(response); 
+        setCourse({
+          ...response,
+          courseTitle: response.title,
+          courseDescription: response.description
+        }); 
         return response;
       })
       // the debug code below will cause a dependencies warning from React
@@ -39,64 +60,117 @@ export default function UpdateCourse() {
       // dependencies array
       // .then(() => console.log('course: ', course))
       .catch(error => {
-        setFetchError(true);
         console.log('Error fetching api: ', error);
+      props.history.push('/error'); // todo
       });  
-  }, [id]);
+  }, [id, props.history]);
 
 
-  function getCourseJSX(course) {
-    return (
-      <>
-        <div>
-          <label htmlFor="courseTitle">Course Title</label>
-          <input id="courseTitle" name="courseTitle" type="text" defaultValue={course.title} />
-          <p>By {`${course.courseUser.firstName} ${course.courseUser.lastName}`}</p>
-          <label htmlFor="courseDescription">Course Description</label>
-          <textarea id="courseDescription" name="courseDescription" defaultValue={course.description}>
-          </textarea>
-        </div>
-        <div>
-          <label htmlFor="estimatedTime">Estimated Time</label>
-          <input id="estimatedTime" name="estimatedTime" type="text" defaultValue={course.estimatedTime} />
-          <label htmlFor="materialsNeeded">Materials Needed</label>
-          <textarea id="materialsNeeded" name="materialsNeeded" defaultValue={course.materialsNeeded}>
-          </textarea>
-        </div>
-      </>
-    );
+  function change(event) {
+    const name = event.target.name;
+    const value = event.target.value;
+
+    setCourse((prevState) => {
+      return {
+        ...prevState,
+        [name]: value
+      };
+    });
+  }    
+
+  function handleCancel() {
+    props.history.push(`/courses/${id}`); 
   }
 
-  function handleCancel(event) {
-    event.preventDefault(); 
-    // location.href='index.html';
-  }
-
-  function getLoadingMsg(fetchErrorOccured) {
-    return (fetchErrorOccured)
-    ? <h1>An error occured while fetching data from the backend, please try again later.</h1>
-    : <h1>Loading...</h1>;    
+  async function updateCourse() {
+    console.log('trying to update the course: ', course,
+      '\n with user credentials: ', context.authenticatedUser);
+    const response = await context.actions.api(
+      `/courses/${id}`, 'PUT', 
+      {
+        ...course,
+        title: course.courseTitle,
+        description: course.courseDescription
+      },
+      true, context.authenticatedUser);
+    console.log('http response was: ', response.status);
+    if (response.status === 204) {
+      // ...? stay here or return to the main route?
+      // setCourse(prevState => ({ // still says 'validation error'
+      //   ...prevState, errors: [ 'Successfully saved changes to the database' ] }));
+      props.history.push(`/courses/${id}`); 
+    }
+    else if (response.status === 400) {
+      const { errors } = await response.json();
+      console.log('Validation error updating the course: ', errors);
+      setCourse(prevState => ({ ...prevState, errors }));
+    }
+    else {
+      // this will not catch problems if the api is unresponsive (not running for example)
+      console.log('API returned an unexpected status code of ', response.status);
+      setCourse(prevState => ({
+        ...prevState, errors: [ `Fatal error: API returned an unexpected status code of ${response.status}` ] }));
+      props.history.push('/error'); // todo
+    }    
   }  
+  function handleSubmit() {
+    updateCourse();
+  }
+
+
+  const { firstName, lastName } = course.courseUser;
 
   return (
     <main>
       <div className="wrap">
         <h2>Update Course</h2>
-        <form>
+        <Form
+          cancel={handleCancel}
+          errors={course.errors}
+          submit={handleSubmit}
+          submitButtonText="Update Course"
+          elements={() => (
           <div className="main--flex">
-            {
-              // "undefined === undefined" yields true :(
-              // also 'id' is a string and course.id is a number, hence the "+id":
-              (course.id && (course.id === +id)) 
-              //course
-                ? getCourseJSX(course)
-                : getLoadingMsg(fetchErrorOccured)
-            } 
+            <div>
+              <label htmlFor="courseTitle">Course Title</label>
+              <input 
+                id="courseTitle" 
+                name="courseTitle" 
+                type="text" 
+                value={course.courseTitle} 
+                onChange={change} 
+              />
+              <p>By {`${firstName} ${lastName}`}</p>
+              <label htmlFor="courseDescription">Course Description</label>
+              <textarea 
+                id="courseDescription" 
+                name="courseDescription" 
+                value={course.courseDescription}
+                onChange={change} 
+              />
+            </div>
+            <div>
+              <label htmlFor="estimatedTime">Estimated Time</label>
+              <input 
+                id="estimatedTime" 
+                name="estimatedTime" 
+                type="text" 
+                value={course.estimatedTime}
+                onChange={change} 
+              />
+              <label htmlFor="materialsNeeded">Materials Needed</label>
+              <textarea 
+                id="materialsNeeded" 
+                name="materialsNeeded" 
+                value={course.materialsNeeded}
+                onChange={change} 
+              />
+            </div>
           </div>
-          <button className="button" type="submit">Update Course</button>
-          <button className="button button-secondary" onClick={handleCancel}>Cancel</button>
-        </form>
+        )} />
       </div>
     </main>
   );
 }
+
+export default withRouter(UpdateCourse);

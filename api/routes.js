@@ -104,8 +104,13 @@ router.get('/courses/:id', asyncHandler( async (req, res) => {
         }
       ]
     });  
-    res.status(200).json(filterCourseData(course[0].get({ plain: true })));
+    // if(course) { // doesn't work, because findAll() throws error if it can't find anything :(
+      res.status(200).json(filterCourseData(course[0].get({ plain: true })));
+    // } else {
+    //   throwError(404, 'The course you are trying to see does not exist (anymore).🤷‍♂️');
+    // }
   } catch(error) {
+    //console.log(`GET /courses/${req.params.id} "crashed" the api!`);
     handleSQLErrorOrRethrow(error, res);
   }
 }));
@@ -143,7 +148,7 @@ router.put('/courses/:id', authenticateUser, asyncHandler( async (req, res) => {
           throwError(403, 'The course you are trying to update does not belong to you.🤷‍♂️');
         }
       } else {
-        throwError(404, 'The course you are trying to update does not exist anymore.🤷‍♂️');
+        throwError(404, 'The course you are trying to update does not exist (anymore).🤷‍♂️');
       }  
     } else { // user specified in auth header was not found
       throwError(401, 'Authorization failed');
@@ -168,7 +173,7 @@ router.delete('/courses/:id', authenticateUser, asyncHandler( async (req, res) =
           throwError(403, 'The course you are trying to delete does not belong to you.🤷‍♂️');
         }
       } else {
-        throwError(404, 'The course you are trying to delete does not exist anymore.🤷‍♂️');
+        throwError(404, 'The course you are trying to delete does not exist (anymore).🤷‍♂️');
       }  
     } else { // user specified in auth header was not found
       throwError(401, 'Authorization failed');

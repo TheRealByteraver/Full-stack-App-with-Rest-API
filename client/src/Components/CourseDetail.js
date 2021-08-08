@@ -20,7 +20,7 @@ import {
 function CourseDetail(props) {
 
   const context = useContext(AuthenticatedUserContext);
-  const [course, setCourse] = useState([]);
+  const [course, setCourse] = useState({});
   const [fetchErrorOccured, setFetchError] = useState(false);  
   const { id } = useParams();
 
@@ -60,40 +60,19 @@ function CourseDetail(props) {
       // back to main page, nothing left to show here ;)
       props.history.push('/'); 
     }
-    else if (response.status === 400) {
+    else /*if (response.status === 400)*/ {
       const { errors } = await response.json();
-      console.log('Validation error creating the course: ', errors);
+      console.log('Validation error deleting the course: ', errors);
       props.history.push('/error'); // todo
     }
-    else {
-      // this will not catch problems if the api is unresponsive (not running for example)
-      console.log('API returned an unexpected status code of ', response.status);
-        props.history.push('/error'); // todo
-    } 
+    // else {
+    //   // this will not catch problems if the api is unresponsive (not running for example)
+    //   console.log('API returned an unexpected status code of ', response.status);
+    //     props.history.push('/error'); // todo
+    // } 
   }
 
   function getCourseJSX(course) {
-
-    // split up the course description into separate paragraphs
-    const description = course.description 
-      ? course.description.split(`\n\n`)
-      : [];
-    const descriptionParagraphs = description.map((paragraph, index) => 
-      <p key={index}>{paragraph}</p> );
-
-    // split up the needed materials list into separate li elements
-    const materials = course.materialsNeeded 
-      ? course.materialsNeeded.split(`\n`)
-      : [];
-
-    // remove last item from material list if empty
-    if (materials.length && !materials[materials.length - 1].length) {
-      materials.pop();
-    }
-    const materialLis = materials.map((material, index) =>
-      <li key={index}>{material.substring(2)}</li> );
-
-
     return (
       <div className="wrap">
         <h2>Course Detail</h2>
@@ -103,14 +82,14 @@ function CourseDetail(props) {
               <h3 className="course--detail--title">Course</h3>
               <h4 className="course--name">{course.title}</h4>
               <p>By {`${course.courseUser.firstName} ${course.courseUser.lastName}`}</p>
-              {descriptionParagraphs}
+              {course.description}
             </div>
             <div>
               <h3 className="course--detail--title">Estimated Time</h3>
               <p>{course.estimatedTime}</p>
               <h3 className="course--detail--title">Materials Needed</h3>
               <ul className="course--detail--list">
-                {materialLis}
+                {course.materialsNeeded}
               </ul>
             </div>
           </div>  

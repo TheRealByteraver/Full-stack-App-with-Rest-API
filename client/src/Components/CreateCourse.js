@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { AuthenticatedUserContext } from './Context';
 import Form from './Form';
 import { withRouter } from "react-router";
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 
 
 // CreateCourse - This component provides the "Create Course" screen by 
@@ -68,6 +68,7 @@ function CreateCourse(props) {
       console.log('API returned an unexpected status code of ', response.status);
       setCreateCourseState(prevState => ({
         ...prevState, errors: [ `Fatal error: API returned an unexpected status code of ${response.status}` ] }));
+      props.history.push('/error'); // todo
     }    
   }
 
