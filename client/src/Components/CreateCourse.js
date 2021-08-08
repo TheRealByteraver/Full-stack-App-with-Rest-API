@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AuthenticatedUserContext } from './Context';
 import Form from './Form';
+import { withRouter } from "react-router";
 import { Link } from 'react-router-dom';
 
 
@@ -11,13 +12,13 @@ import { Link } from 'react-router-dom';
 //  a "Cancel" button that returns the user to the default route (i.e. the 
 // list of courses).
 
-export default function CreateCourse(props) {
+function CreateCourse(props) {
 
   const context = useContext(AuthenticatedUserContext);
 
   const [createCourseState, setCreateCourseState] = useState({
-    title: '',
-    description: '',
+    courseTitle: '',
+    courseDescription: '',
     estimatedTime: '',
     materialsNeeded: '',
     errors: []
@@ -36,7 +37,7 @@ export default function CreateCourse(props) {
   }  
 
   function handleCancel() {
-    props.history.push('/'); // might generate crash!! to check
+    props.history.push('/'); 
   }
 
   async function createCourse() {
@@ -53,7 +54,9 @@ export default function CreateCourse(props) {
     console.log('http response was: ', response.status);
     if (response.status === 201) {
       // ...? stay here or return to the main route?
-      //props.history.push('/'); // Cannot read property 'push' of undefined
+      // setCreateCourseState(prevState => ({ // still says 'validation error'
+      //   ...prevState, errors: [ 'Successfully saved the new course in the database' ] }));
+      props.history.push('/'); 
     }
     else if (response.status === 400) {
       const { errors } = await response.json();
@@ -71,6 +74,8 @@ export default function CreateCourse(props) {
   function handleSubmit() {
     createCourse();
   }  
+
+  const { firstName, lastName } = context.authenticatedUser;
 
   return (
     <main>
@@ -93,7 +98,7 @@ export default function CreateCourse(props) {
                   onChange={change} 
                   placeholder="" 
                 />
-                <p>By Joe Smith</p>
+                <p>By {firstName} {lastName}</p>
                 <label htmlFor="courseDescription">Course Description</label>
                 <textarea 
                   id="courseDescription" 
@@ -128,3 +133,5 @@ export default function CreateCourse(props) {
     </main>
   );
 }
+
+export default withRouter(CreateCourse);

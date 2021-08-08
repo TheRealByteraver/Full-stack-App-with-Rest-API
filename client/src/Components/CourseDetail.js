@@ -4,6 +4,7 @@ import {
   // BrowserRouter as Router,
   // Switch,
   // Route,
+  withRouter,
   Link,
   useParams
 } from "react-router-dom";
@@ -16,7 +17,7 @@ import {
 // renders an "Update Course" button for navigating to the "Update Course" 
 // screen.
 
-export default function CourseDetail() {
+function CourseDetail(props) {
 
   const context = useContext(AuthenticatedUserContext);
   const [course, setCourse] = useState([]);
@@ -46,7 +47,30 @@ export default function CourseDetail() {
         setFetchError(true);
         console.log('Error fetching api: ', error);
       });  
-}, [id]);
+  }, [id]);
+
+  async function deleteCourse() {
+    console.log('Attempting to delete the course with id ', id);
+    
+    const response = await context.actions.api(
+      `/courses/${id}`, 'DELETE', null, true, context.authenticatedUser);
+    
+    console.log('http response was: ', response.status);
+    if (response.status === 204) {
+      // back to main page, nothing left to show here ;)
+      props.history.push('/'); 
+    }
+    else if (response.status === 400) {
+      const { errors } = await response.json();
+      console.log('Validation error creating the course: ', errors);
+      props.history.push('/error'); // todo
+    }
+    else {
+      // this will not catch problems if the api is unresponsive (not running for example)
+      console.log('API returned an unexpected status code of ', response.status);
+        props.history.push('/error'); // todo
+    } 
+  }
 
   function getCourseJSX(course) {
 
@@ -68,6 +92,7 @@ export default function CourseDetail() {
     }
     const materialLis = materials.map((material, index) =>
       <li key={index}>{material.substring(2)}</li> );
+
 
     return (
       <div className="wrap">
@@ -112,7 +137,7 @@ export default function CourseDetail() {
         return (
           <>
             <Link className="button" to={`/courses/${id}/update`}>Update Course</Link>
-            <Link className="button" to="#">Delete Course</Link>
+            <Link className="button" to="#" onClick={deleteCourse}>Delete Course</Link>
           </>                    
         );
       }
@@ -139,3 +164,5 @@ export default function CourseDetail() {
     </main>
   );
 }
+
+export default withRouter(CourseDetail);
