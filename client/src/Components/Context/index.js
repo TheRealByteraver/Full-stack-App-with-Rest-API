@@ -14,12 +14,15 @@ export function Provider(props) {
       "lastName": "Smith",
       "emailAddress": "joe@smith.com"
     }   
+    We will add the password to that object so we can correctly set
+    the auth headers for further api calls
   */
   const [authenticatedUser, setAuthenticatedUser] = 
     useState(() => {
         const cookie = Cookies.get(cookieName);
         return (cookie ? JSON.parse(cookie) : null);
     });
+
 
   // helper function to fetch the api with authorization headers 
   // (if applicable)
@@ -58,7 +61,13 @@ export function Provider(props) {
     const response = await api(
       `/users`, 'GET', null, true, { emailAddress, password });
     if (response.status === 200) {
-      return response.json();//.then(data => data);
+      let authUser = await response.json();
+      authUser = {
+        ...authUser,
+        password  // save password for further api calls
+      };
+      console.log('authUser as returned by getUser() will be: ', authUser);
+      return authUser;
     }
     else if (response.status === 401) {
       return null;
@@ -75,19 +84,17 @@ export function Provider(props) {
       setAuthenticatedUser(() => user);
       // Set cookie that will expire after 1 day:
       // docs at https://github.com/js-cookie/js-cookie#expires
+      console.log('We will save the following cookie: ', JSON.stringify(user));
       Cookies.set(cookieName, JSON.stringify(user), { expires: 1 });
     }
     console.log('SignIn() returned the user ', user);
-    return user;
+    return user; 
   }
 
   // Function to sign out a user
   const signOut = () => {
     console.log('Signing out user ', authenticatedUser);
     setAuthenticatedUser(() => {       
-      // return { 
-      //   authenticatedUser: null 
-      // }
       return null
     });
     Cookies.remove(cookieName);

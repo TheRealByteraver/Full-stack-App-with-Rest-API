@@ -45,7 +45,7 @@ function App() {
           <Route path="/signup" component={UserSignUp} />
           <Route path="/signout" component={UserSignOut} />
           <Route component={ () =>
-                <h1>404 - The requested route is not available</h1> } />
+                <h2>404 - The requested route is not available</h2> } />
         </Switch>
       </BrowserRouter>
     </Provider>

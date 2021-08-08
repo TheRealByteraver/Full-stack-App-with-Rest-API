@@ -1,4 +1,8 @@
-import React from 'react';
+import React, { useState, useContext } from 'react';
+import { AuthenticatedUserContext } from './Context';
+import Form from './Form';
+import { Link } from 'react-router-dom';
+
 
 // CreateCourse - This component provides the "Create Course" screen by 
 // rendering a form that allows a user to create a new course. The component
@@ -7,46 +11,119 @@ import React from 'react';
 //  a "Cancel" button that returns the user to the default route (i.e. the 
 // list of courses).
 
-export default function CreateCourse() {
+export default function CreateCourse(props) {
 
-  function handleClick(event) {
-    event.preventDefault(); 
-    // location.href='index.html';
+  const context = useContext(AuthenticatedUserContext);
+
+  const [createCourseState, setCreateCourseState] = useState({
+    title: '',
+    description: '',
+    estimatedTime: '',
+    materialsNeeded: '',
+    errors: []
+  });    
+
+  function change(event) {
+    const name = event.target.name;
+    const value = event.target.value;
+
+    setCreateCourseState((prevState) => {
+      return {
+        ...prevState,
+        [name]: value
+      };
+    });
+  }  
+
+  function handleCancel() {
+    props.history.push('/'); // might generate crash!! to check
   }
+
+  async function createCourse() {
+    console.log('trying to create the course: ', createCourseState,
+      '\n with user credentials: ', context.authenticatedUser);
+    const response = await context.actions.api(
+      '/courses', 'POST', 
+      {
+        ...createCourseState,
+        title: createCourseState.courseTitle,
+        description: createCourseState.courseDescription
+      },
+      true, context.authenticatedUser);
+    console.log('http response was: ', response.status);
+    if (response.status === 201) {
+      // ...? stay here or return to the main route?
+      //props.history.push('/'); // Cannot read property 'push' of undefined
+    }
+    else if (response.status === 400) {
+      const { errors } = await response.json();
+      console.log('Validation error creating the course: ', errors);
+      setCreateCourseState(prevState => ({ ...prevState, errors }));
+    }
+    else {
+      // this will not catch problems if the api is unresponsive (not running for example)
+      console.log('API returned an unexpected status code of ', response.status);
+      setCreateCourseState(prevState => ({
+        ...prevState, errors: [ `Fatal error: API returned an unexpected status code of ${response.status}` ] }));
+    }    
+  }
+
+  function handleSubmit() {
+    createCourse();
+  }  
 
   return (
     <main>
       <div className="wrap">
         <h2>Create Course</h2>
-        <div className="validation--errors">
-          <h3>Validation Errors</h3>
-          <ul>
-            <li>Please provide a value for "Title"</li>
-            <li>Please provide a value for "Description"</li>
-          </ul>
-        </div>
-        <form>
-          <div className="main--flex">
-            <div>
-              <label htmlFor="courseTitle">Course Title</label>
-              <input id="courseTitle" name="courseTitle" type="text" defaultValue="" />
-
-              <p>By Joe Smith</p>
-
-              <label htmlFor="courseDescription">Course Description</label>
-              <textarea id="courseDescription" name="courseDescription"></textarea>
+        <Form
+          cancel={handleCancel}
+          errors={createCourseState.errors}
+          submit={handleSubmit}
+          submitButtonText="Create Course"
+          elements={() => (
+            <div className="main--flex">
+              <div>
+                <label htmlFor="courseTitle">Course Title</label>
+                <input
+                  id="courseTitle" 
+                  name="courseTitle" 
+                  type="text" 
+                  value={createCourseState.courseTitle} 
+                  onChange={change} 
+                  placeholder="" 
+                />
+                <p>By Joe Smith</p>
+                <label htmlFor="courseDescription">Course Description</label>
+                <textarea 
+                  id="courseDescription" 
+                  name="courseDescription"
+                  value={createCourseState.courseDescription} 
+                  onChange={change} 
+                  placeholder="" 
+                />
+              </div>
+              <div>
+                <label htmlFor="estimatedTime">Estimated Time</label>
+                <input 
+                  id="estimatedTime" 
+                  name="estimatedTime" 
+                  type="text"                  
+                  value={createCourseState.estimatedTime} 
+                  onChange={change} 
+                  placeholder="" 
+                />
+                <label htmlFor="materialsNeeded">Materials Needed</label>
+                <textarea 
+                  id="materialsNeeded" 
+                  name="materialsNeeded"
+                  value={createCourseState.materialsNeeded} 
+                  onChange={change} 
+                  placeholder="" 
+                />
+              </div>
             </div>
-            <div>
-              <label htmlFor="estimatedTime">Estimated Time</label>
-              <input id="estimatedTime" name="estimatedTime" type="text" defaultValue="" />
-
-              <label htmlFor="materialsNeeded">Materials Needed</label>
-              <textarea id="materialsNeeded" name="materialsNeeded"></textarea>
-            </div>
-          </div>
-          <button className="button" type="submit">Create Course</button>
-          <button className="button button-secondary" onClick={handleClick}>Cancel</button>
-        </form>
+        )} />
       </div>
     </main>
   );
