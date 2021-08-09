@@ -14,6 +14,7 @@ import ReactMarkdown from 'react-markdown';
 function CourseDetail(props) {
 
   const context = useContext(AuthenticatedUserContext);
+  const [deleteTriggered, setDeleteTriggered] = useState(false);
   const [course, setCourse] = useState({
     courseTitle: '',
     courseDescription: '',
@@ -30,13 +31,20 @@ function CourseDetail(props) {
   const { id } = useParams();
 
   useEffect(() => {
+    if (deleteTriggered) {
+      return;
+    }
+    console.log('CourseDetail: calling useEffect()');
+    let mounted = true; // https://www.benmvp.com/blog/handling-async-react-component-effects-after-unmount/
     (async () => {
       try {
         const response = await context.actions.api(`/courses/${id}`, 'GET');
         console.log('http response was: ', response.status);
         if (response.status === 200) {
           const courseDetails = await response.json();
-          setCourse(courseDetails);
+          if (mounted) {
+            setCourse(courseDetails);
+          }
         }
         else if (response.status === 404) {
           const { message } = await response.json();
@@ -55,29 +63,39 @@ function CourseDetail(props) {
         props.history.push('/error'); 
       };
     })();
-  }, [id, props.history, context.actions]);
+    return () => {
+      mounted = false;
+    }  }, [id, props.history, context.actions]);
 
   async function deleteCourse() {
-    console.log('Attempting to delete the course with id ', id);
-    
-    const response = await context.actions.api(
-      `/courses/${id}`, 'DELETE', null, true, context.authenticatedUser);
-    
-    console.log('http response was: ', response.status);
-    if (response.status === 204) {
-      // back to main page, nothing left to show here ;)
-      props.history.push('/'); 
-    }
-    else /*if (response.status === 400)*/ {
-      const { errors } = await response.json();
-      console.log('Validation error deleting the course: ', errors);
-      props.history.push('/error'); // todo
-    }
-    // else {
-    //   // this will not catch problems if the api is unresponsive (not running for example)
-    //   console.log('API returned an unexpected status code of ', response.status);
-    //     props.history.push('/error'); // todo
-    // } 
+    setDeleteTriggered(true);
+    try {
+      console.log(`Attempting to delete course ${id}`);
+      const response = await context.actions.api(
+        `/courses/${id}`, 'DELETE', null, true, context.authenticatedUser);
+      
+      console.log('http response was: ', response.status);
+      if (response.status === 204) {
+        // success, back to main page
+        props.history.push('/'); 
+      }
+      else if (response.status === 403) {
+        const { message } = await response.json();
+        console.log(`Authorization error deleting the course ${id}: ${message}`);
+        context.actions.setErrorMessage(`Failed to delete course ${id}: ${message}`);
+        props.history.push('/forbidden'); 
+      }
+      else if (response.status === 404) {
+        const { message } = await response.json();
+        console.log(`Error 404 'Not Found' while deleting the course ${id}: ${message}`);
+        context.actions.setErrorMessage(`Failed to delete course ${id}: ${message}`);
+        props.history.push('/notfound'); 
+      }
+    } catch(error) {
+      console.log('Failed to fetch API');
+      context.actions.setErrorMessage(`Failed to fetch API`);
+      props.history.push('/error'); 
+    };
   }
 
   // The following function shows the 'Update Course' and 'Delete Course' 
@@ -88,7 +106,8 @@ function CourseDetail(props) {
     const courseLoaded = (course.id && (course.id === +id));
     const { authenticatedUser } = context;
     if (courseLoaded && authenticatedUser) {
-      if (course.courseUser.emailAddress === authenticatedUser.emailAddress) {
+      // if (course.courseUser.emailAddress === authenticatedUser.emailAddress) { 
+      if (true) {
         return (
           <>
             <Link className="button" to={`/courses/${id}/update`}>Update Course</Link>

@@ -32,9 +32,9 @@ export default function Courses() {
       // dependencies array
       // .then(() => console.log('courses: ', courses))
       .catch(error => {
-                        setFetchError(true);
-                        console.log('Error fetching api: ', error);
-                      });  
+          setFetchError(true);
+          console.log('Error fetching api: ', error);
+        });  
   }, []);
 
   // take care of the dynamic part of the page:

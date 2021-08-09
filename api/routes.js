@@ -141,6 +141,7 @@ router.put('/courses/:id', authenticateUser, asyncHandler( async (req, res) => {
     if (user) {
       const course = await Course.findByPk(req.params.id);
       if (course) {
+        // console.log('Found the course ', req.params.id, '!');
         if (course.userId === user.id) {
           req.body.userId = user.id;
           await course.update(req.body);    

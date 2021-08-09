@@ -25,13 +25,14 @@ export function Provider(props) {
         return (cookie ? JSON.parse(cookie) : null);
     });
 
-
   // helper function to fetch the api with authorization headers 
-  // (if applicable)
   const api = ( 
     path, method = 'GET', body = null, 
     requiresAuth = false, credentials = null) => {
 
+    // reset the applications' global error message:
+    setErrorMessage('');
+    
     const url = apiBaseUrl + path;
     const options = {
       method,
@@ -54,7 +55,7 @@ export function Provider(props) {
       ', requiresAuth is ', requiresAuth,
       ', with method ', options.method,
       ', with body ', options.body,
-      ', with headers: ', options.headers);
+      ', with headers: ', options.headers);    
     return fetch(url, options);
   }  
 

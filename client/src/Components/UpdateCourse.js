@@ -31,33 +31,42 @@ function UpdateCourse(props) {
   const { id } = useParams();
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/courses/${id}`)
-      .then(response => {
-        if(response.ok) {
-          return Promise.resolve(response);
-        } else {
-          return Promise.reject(new Error(response.statusText));
+    let mounted = true; // https://www.benmvp.com/blog/handling-async-react-component-effects-after-unmount/
+    (async () => {
+      try {
+        const response = await context.actions.api(`/courses/${id}`, 'GET');
+        console.log('http response was: ', response.status);
+        if (response.status === 200) {
+          const courseDetails = await response.json();
+          if (mounted) {
+            setCourse({
+              ...courseDetails,
+              courseTitle: courseDetails.title,
+              courseDescription: courseDetails.description
+            }); 
+          }
         }
-      })
-      .then(response => response.json())
-      .then(response => { 
-        setCourse({
-          ...response,
-          courseTitle: response.title,
-          courseDescription: response.description
-        }); 
-        return response;
-      })
-      // the debug code below will cause a dependencies warning from React
-      // because we use the variable 'course' without specifying it in the
-      // dependencies array
-      // .then(() => console.log('course: ', course))
-      .catch(error => {
-        console.log('Error fetching api: ', error);
-        props.history.push('/error'); // todo
-      });  
-  }, [id, props.history]);
-
+        else if (response.status === 404) {
+          const { message } = await response.json();
+          console.log(`Error retrieving course ${id}: ${message}`);
+          context.actions.setErrorMessage(message);
+          props.history.push('/notfound'); 
+        }
+        else {
+          console.log('API returned unexpected status code ', response.status);
+          context.actions.setErrorMessage(`Unable to interpret API response ${response.status}`);
+          props.history.push('/error'); 
+        }        
+      } catch(error) {
+        console.log('Failed to fetch API');
+        context.actions.setErrorMessage(`Failed to fetch API`);
+        props.history.push('/error'); 
+      };
+    })();
+    return () => {
+      mounted = false;
+    }    
+  }, [id, props.history, context.actions]);
 
   function change(event) {
     const name = event.target.name;
@@ -76,36 +85,50 @@ function UpdateCourse(props) {
   }
 
   async function updateCourse() {
-    console.log('trying to update the course: ', course,
-      '\n with user credentials: ', context.authenticatedUser);
-    const response = await context.actions.api(
-      `/courses/${id}`, 'PUT', 
-      {
-        ...course,
-        title: course.courseTitle,
-        description: course.courseDescription
-      },
-      true, context.authenticatedUser);
-    console.log('http response was: ', response.status);
-    if (response.status === 204) {
-      // ...? stay here or return to the main route?
-      // setCourse(prevState => ({ // still says 'validation error'
-      //   ...prevState, errors: [ 'Successfully saved changes to the database' ] }));
-      props.history.push(`/courses/${id}`); 
-    }
-    else if (response.status === 400) {
-      const { errors } = await response.json();
-      console.log('Validation error updating the course: ', errors);
-      setCourse(prevState => ({ ...prevState, errors }));
-    }
-    else {
-      // this will not catch problems if the api is unresponsive (not running for example)
-      console.log('API returned an unexpected status code of ', response.status);
-      setCourse(prevState => ({
-        ...prevState, errors: [ `Fatal error: API returned an unexpected status code of ${response.status}` ] }));
-      props.history.push('/error'); // todo
-    }    
-  }  
+    try {
+      console.log('trying to update the course: ', course,
+        '\n with user credentials: ', context.authenticatedUser);
+      const response = await context.actions.api(
+        `/courses/${id}`, 'PUT', 
+        {
+          ...course,
+          title: course.courseTitle,
+          description: course.courseDescription
+        },
+        true, context.authenticatedUser);
+      console.log('http response was: ', response.status);
+      if (response.status === 204) {
+        props.history.push(`/courses/${id}`); 
+      }
+      else if (response.status === 400) {
+        const { errors } = await response.json();
+        console.log('Validation error updating the course: ', errors);
+        setCourse(prevState => ({ ...prevState, errors }));
+      }
+      else if (response.status === 403) {
+        const { message } = await response.json();
+        console.log(`Authorization error updating the course ${id}: ${message}`);
+        context.actions.setErrorMessage(`Failed to update course ${id}: ${message}`);
+        props.history.push('/forbidden'); 
+      }
+      else if (response.status === 404) {
+        const { message } = await response.json();
+        console.log(`Error 404 'Not Found' while updating the course ${id}: ${message}`);
+        context.actions.setErrorMessage(`Failed to update course ${id}: ${message}`);
+        props.history.push('/notfound'); 
+      }
+      else {
+        console.log('API returned an unexpected status code of ', response.status);
+        context.actions.setErrorMessage(`Unexpected response from API`);
+        props.history.push('/error'); 
+      }    
+    } catch(error) {
+      console.log('Failed to fetch API');
+      context.actions.setErrorMessage(`Failed to fetch API`);
+      props.history.push('/error'); 
+    };
+  }
+
   function handleSubmit() {
     updateCourse();
   }

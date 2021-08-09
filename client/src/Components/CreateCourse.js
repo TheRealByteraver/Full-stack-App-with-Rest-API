@@ -41,35 +41,36 @@ function CreateCourse(props) {
   }
 
   async function createCourse() {
-    console.log('trying to create the course: ', createCourseState,
-      '\n with user credentials: ', context.authenticatedUser);
-    const response = await context.actions.api(
-      '/courses', 'POST', 
-      {
-        ...createCourseState,
-        title: createCourseState.courseTitle,
-        description: createCourseState.courseDescription
-      },
-      true, context.authenticatedUser);
-    console.log('http response was: ', response.status);
-    if (response.status === 201) {
-      // ...? stay here or return to the main route?
-      // setCreateCourseState(prevState => ({ // still says 'validation error'
-      //   ...prevState, errors: [ 'Successfully saved the new course in the database' ] }));
-      props.history.push('/'); 
-    }
-    else if (response.status === 400) {
-      const { errors } = await response.json();
-      console.log('Validation error creating the course: ', errors);
-      setCreateCourseState(prevState => ({ ...prevState, errors }));
-    }
-    else {
-      // this will not catch problems if the api is unresponsive (not running for example)
-      console.log('API returned an unexpected status code of ', response.status);
-      setCreateCourseState(prevState => ({
-        ...prevState, errors: [ `Fatal error: API returned an unexpected status code of ${response.status}` ] }));
-      props.history.push('/error'); // todo
-    }    
+    try {
+      console.log('trying to create the course: ', createCourseState,
+        '\n with user credentials: ', context.authenticatedUser);
+      const response = await context.actions.api(
+        '/courses', 'POST', 
+        {
+          ...createCourseState,
+          title: createCourseState.courseTitle,
+          description: createCourseState.courseDescription
+        },
+        true, context.authenticatedUser);
+      console.log('http response was: ', response.status);
+      if (response.status === 201) {
+        props.history.push('/'); 
+      }
+      else if (response.status === 400) {
+        const { errors } = await response.json();
+        console.log('Validation error creating the course: ', errors);
+        setCreateCourseState(prevState => ({ ...prevState, errors }));
+      }
+      else {
+        console.log('API returned an unexpected status code of ', response.status);
+        context.actions.setErrorMessage(`Unable to interpret API response ${response.status}`);
+        props.history.push('/error'); 
+      }    
+    } catch(error) {
+      console.log('Failed to fetch API');
+      context.actions.setErrorMessage(`Failed to fetch API`);
+      props.history.push('/error'); 
+    };
   }
 
   function handleSubmit() {
