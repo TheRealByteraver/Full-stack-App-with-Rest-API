@@ -13,28 +13,59 @@ export default function Courses(props) {
   const [courses, setCourses] = useState();
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/courses')
-      .then(response => {
-        if(response.ok) {
-          return Promise.resolve(response);
-        } else {
-          return Promise.reject(new Error(response.statusText));
+    let mounted = true; // https://www.benmvp.com/blog/handling-async-react-component-effects-after-unmount/
+    (async () => {
+      try {
+        const response = await context.actions.api('/courses', 'GET');
+        console.log('http response was: ', response.status);
+        if (response.status === 200) {
+          const courses = await response.json();
+          if (mounted) {
+            setCourses(courses); 
+          }
         }
-      })
-      .then(response => response.json())
-      .then(response => { 
-        setCourses(response); 
-        return response;
-      })
-      // the debug code below will cause a dependencies warning from React
-      // because we use the variable 'courses' without specifying it in the
-      // dependencies array
-      // .then(() => console.log('courses: ', courses))
-      .catch(error => {
+        else {
+          console.log('API returned unexpected status code ', response.status);
+          context.actions.setErrorMessage(
+            `Unable to interpret API response ${response.status}`);
+          props.history.push('/error'); 
+        }        
+      } catch(error) {
         console.log('Failed to fetch API');
-        context.actions.setErrorMessage(`Failed to fetch API: ${error}`);
+        context.actions.setErrorMessage(`Failed to fetch API`);
         props.history.push('/error'); 
-      });  
+      };
+    })();
+    return () => {
+      mounted = false;
+    }    
+
+
+
+    // fetch('http://localhost:5000/api/courses')
+    //   .then(response => {
+    //     if(response.ok) {
+    //       return Promise.resolve(response);
+    //     } else {
+    //       return Promise.reject(new Error(response.statusText));
+    //     }
+    //   })
+    //   .then(response => response.json())
+    //   .then(response => { 
+    //     if()
+
+    //     setCourses(response); 
+    //     return response;
+    //   })
+    //   // the debug code below will cause a dependencies warning from React
+    //   // because we use the variable 'courses' without specifying it in the
+    //   // dependencies array
+    //   // .then(() => console.log('courses: ', courses))
+    //   .catch(error => {
+    //     console.log('Failed to fetch API');
+    //     context.actions.setErrorMessage(`Failed to fetch API: ${error}`);
+    //     props.history.push('/error'); 
+    //   });  
   }, [context.actions, props.history]);
 
   return (
@@ -51,7 +82,9 @@ export default function Courses(props) {
                   <h2 className="course--label">Course</h2>
                   <h3 className="course--title">{course.title}</h3>
                 </a>)
-            : <h1>Loading...</h1>
+            : <div className="wrap">
+                <h2>Loading courses data... Please wait</h2>
+              </div>
         }
         <a className='course--module course--add--module' href='/courses/create'>
           <span className='course--add--title'>

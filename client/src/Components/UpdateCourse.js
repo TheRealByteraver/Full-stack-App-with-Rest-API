@@ -147,7 +147,6 @@ function UpdateCourse(props) {
     updateCourse();
   }
 
-
   const { firstName, lastName } = course.courseUser;
 
   return (
