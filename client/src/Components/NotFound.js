@@ -5,10 +5,20 @@ export default function NotFound(props) {
   const context = useContext(AuthenticatedUserContext);
 
   return (
-    <div>
-      <h2>404 - The page you are looking for does not exist.</h2>
-      <p>Detailed error message: {context.errorMessage}</p>
-      <p>Click on 'Courses' (top left) to return to the main page.</p>
-    </div>
+    <>
+      <div className="actions--bar">
+        <div className="wrap">
+          <a className="button button-secondary" href="/">Return to List</a>
+        </div>
+      </div>    
+      <div>
+        <h2>404 - The page you are looking for does not exist.</h2>
+        {
+          context.errorMessage.length
+            ? <p>Detailed error message: {context.errorMessage}</p>
+            : null
+        }        
+      </div>
+    </>
   )
 }

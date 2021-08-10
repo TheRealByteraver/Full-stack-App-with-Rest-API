@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-// import Course from './Course';
-
+import React, { useState, useEffect, useContext } from 'react';
+import { AuthenticatedUserContext } from './Context';
 
 // Courses - This component provides the 'Courses' screen by retrieving the 
 // list of courses from the REST API's /api/courses route and rendering a 
@@ -8,10 +7,10 @@ import React, { useState, useEffect } from 'react';
 // 'Course Detail' screen. This component also renders a link to the 
 // 'Create Course' screen.
 
-export default function Courses() {
+export default function Courses(props) {
 
-  const [courses, setCourses] = useState([]);
-  const [fetchErrorOccured, setFetchError] = useState(false);
+  const context = useContext(AuthenticatedUserContext);
+  const [courses, setCourses] = useState();
 
   useEffect(() => {
     fetch('http://localhost:5000/api/courses')
@@ -32,37 +31,39 @@ export default function Courses() {
       // dependencies array
       // .then(() => console.log('courses: ', courses))
       .catch(error => {
-          setFetchError(true);
-          console.log('Error fetching api: ', error);
-        });  
-  }, []);
-
-  // take care of the dynamic part of the page:
-  function getCoursesJSX(courses, fetchErrorOccured) {
-    if (courses.length > 0) {
-      return courses.map(course => 
-        <a key={course.id} className="course--module course--link" href={`/courses/${course.id}`}>
-          <h2 className="course--label">Course</h2>
-          <h3 className="course--title">{course.title}</h3>
-        </a>);
-    } else {
-      return (fetchErrorOccured)
-      ? <h1>An error occured while fetching data from the backend, please try again later.</h1>
-      : <h1>Loading...</h1>;
-    }
-  }
+        console.log('Failed to fetch API');
+        context.actions.setErrorMessage(`Failed to fetch API: ${error}`);
+        props.history.push('/error'); 
+      });  
+  }, [context.actions, props.history]);
 
   return (
     <main>
       <div className='wrap main--grid'>
         {
-          // function parameters must be here or React will not re-render on state change
-          getCoursesJSX(courses, fetchErrorOccured)
+          // Display 'Loading' screen until fetch is complete
+          courses 
+            ? courses.map(course => 
+                <a 
+                  key={course.id} 
+                  className="course--module course--link" 
+                  href={`/courses/${course.id}`} >
+                  <h2 className="course--label">Course</h2>
+                  <h3 className="course--title">{course.title}</h3>
+                </a>)
+            : <h1>Loading...</h1>
         }
         <a className='course--module course--add--module' href='/courses/create'>
           <span className='course--add--title'>
-            <svg version='1.1' xmlns='http://www.w3.org/2000/svg' x='0px' y='0px'
-            viewBox='0 0 13 13' className='add'><polygon points='7,6 7,0 6,0 6,6 0,6 0,7 6,7 6,13 7,13 7,7 13,7 13,6 '></polygon></svg>
+            <svg 
+              version='1.1' 
+              xmlns='http://www.w3.org/2000/svg' x='0px' y='0px'
+              viewBox='0 0 13 13' 
+              className='add'>
+              <polygon 
+                points='7,6 7,0 6,0 6,6 0,6 0,7 6,7 6,13 7,13 7,7 13,7 13,6 ' >
+              </polygon>
+            </svg>
             New Course
           </span>
         </a>

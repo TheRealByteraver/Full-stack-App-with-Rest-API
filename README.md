@@ -1,0 +1,1 @@
+# FULL Stack project: React frontend + express backend

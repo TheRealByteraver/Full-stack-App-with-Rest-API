@@ -38,6 +38,20 @@ function UpdateCourse(props) {
         console.log('http response was: ', response.status);
         if (response.status === 200) {
           const courseDetails = await response.json();
+          const { courseUser } = courseDetails;
+          if (courseUser.emailAddress !== 
+            context.authenticatedUser.emailAddress) {
+            console.log(
+              `Currently logged in user ` +
+              `"${context.authenticatedUser.emailAddress}" has no right to ` + 
+              `edit course ${id}: "${courseDetails.title}" because it is ` +
+              `owned by ${courseUser.emailAddress}.`);
+            context.actions.setErrorMessage(
+              `Failed to update course ${id}: user ` +
+              `"${context.authenticatedUser.emailAddress}" ` +
+              `is not authorized to edit this course.`);
+            props.history.push('/forbidden');                               
+          } else 
           if (mounted) {
             setCourse({
               ...courseDetails,
@@ -66,7 +80,7 @@ function UpdateCourse(props) {
     return () => {
       mounted = false;
     }    
-  }, [id, props.history, context.actions]);
+  }, [id, props.history, context.actions, context.authenticatedUser.emailAddress]);
 
   function change(event) {
     const name = event.target.name;
@@ -139,7 +153,11 @@ function UpdateCourse(props) {
   return (
     <main>
       <div className="wrap">
-        <h2>Update Course</h2>
+        { 
+          course.id 
+            ? <h2>Update Course</h2>
+            : <h2>Loading course data... Please wait</h2>
+        }        
         <Form
           cancel={handleCancel}
           errors={course.errors}

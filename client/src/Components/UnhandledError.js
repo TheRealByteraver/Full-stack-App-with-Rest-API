@@ -5,10 +5,20 @@ export default function UnhandledError(props) {
   const context = useContext(AuthenticatedUserContext);
 
   return (
-    <div>
-      <h2>Error: a fatal error occured, your request could not be handled.</h2>
-      <p>Detailed error message: {context.errorMessage}</p>
-      <p>Click on 'Courses' (top left) to return to the main page.</p>
-    </div>
+    <>
+      <div className="actions--bar">
+        <div className="wrap">
+          <a className="button button-secondary" href="/">Return to List</a>
+        </div>
+      </div>    
+      <div>
+        <h2>Error: a fatal error occured, your request could not be handled.</h2>
+        {
+          context.errorMessage.length
+            ? <p>Detailed error message: {context.errorMessage}</p>
+            : null
+        }
+      </div>
+    </>
   )
 }

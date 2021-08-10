@@ -65,7 +65,7 @@ function CourseDetail(props) {
     })();
     return () => {
       mounted = false;
-    }  }, [id, props.history, context.actions]);
+    }  }, [id, props.history, context.actions, deleteTriggered]);
 
   async function deleteCourse() {
     setDeleteTriggered(true);
@@ -106,8 +106,8 @@ function CourseDetail(props) {
     const courseLoaded = (course.id && (course.id === +id));
     const { authenticatedUser } = context;
     if (courseLoaded && authenticatedUser) {
-      // if (course.courseUser.emailAddress === authenticatedUser.emailAddress) { 
-      if (true) {
+      if (course.courseUser.emailAddress === authenticatedUser.emailAddress) { 
+      // if (true) {
         return (
           <>
             <Link className="button" to={`/courses/${id}/update`}>Update Course</Link>

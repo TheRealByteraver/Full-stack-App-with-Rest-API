@@ -43,10 +43,9 @@ function App() {
           <Route path="/signin" component={UserSignIn} />
           <Route path="/signup" component={UserSignUp} />
           <Route path="/signout" component={UserSignOut} />
-
           <Route path="/forbidden" component={Forbidden} />
           <Route path="/error" component={UnhandledError} />
-          {/* <Route path="/notfound" component={NotFound} /> */}
+          <Route path="/notfound" component={NotFound} />
           <Route component={NotFound} />
         </Switch>
       </BrowserRouter>
