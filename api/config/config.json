@@ -1,17 +1,19 @@
 {
   "development": {
-    "username": "sql11440457",
-    "password": "yw3NGcx5jt",
-    "database": "sql11440457",
-    "host": "sql11.freemysqlhosting.net",
-    "dialect": "mysql"
+    "storage": "fsjstd-restapi.db",
+    "username": "root",
+    "password": null,
+    "database": "database_development",
+    "host": "127.0.0.1",
+    "dialect": "sqlite"
   },
   "test": {
-    "username": "sql11440457",
-    "password": "yw3NGcx5jt",
-    "database": "sql11440457",
-    "host": "sql11.freemysqlhosting.net",
-    "dialect": "mysql"
+    "storage": "fsjstd-restapi.db",
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "sqlite"
   },
   "production": {
     "username": "project09",

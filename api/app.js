@@ -25,7 +25,9 @@ const app = express();
 // doc: https://medium.com/zero-equals-false/using-cors-in-express-cac7e29b005b
 const cors = require('cors');
 var allowedOrigins = ['http://localhost:3000',
-                      'https://secret-woodland-36609.herokuapp.com'];                    
+                      'https://secret-woodland-36609.herokuapp.com',
+                      'http://127.0.0.1:8080',
+                      'https://project10.erland.info'];
 
 app.use(cors({
   origin: function(origin, callback){
