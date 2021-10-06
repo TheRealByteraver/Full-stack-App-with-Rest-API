@@ -1,9 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/api/node_modules
-/client/node_modules
-/.pnp
+node_modules
 .pnp.js
 
 # testing
@@ -11,11 +9,6 @@
 
 # production
 /build
-
-
-# db backup/test files
-/api/fsjstd-restapi.db
-/api/config/config.json.old
 
 # misc
 .DS_Store

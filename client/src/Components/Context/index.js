@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Cookies from 'js-cookie';
 
-const apiBaseUrl = 'http://localhost:5000/api';
+// const apiBaseUrl = 'http://localhost:5000/api';
 const cookieName = 'authenticatedUser';
 
 export const AuthenticatedUserContext = React.createContext();
@@ -33,7 +33,7 @@ export function Provider(props) {
     // reset the applications' global error message:
     setErrorMessage('');
     
-    const url = apiBaseUrl + path;
+    const url = (process.env.REACT_APP_COURSES_API_URL/* || apiBaseUrl*/) + path;
     const options = {
       method,
       headers: {

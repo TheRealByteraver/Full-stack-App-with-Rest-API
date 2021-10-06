@@ -25,7 +25,8 @@ const app = express();
 // doc: https://medium.com/zero-equals-false/using-cors-in-express-cac7e29b005b
 const cors = require('cors');
 var allowedOrigins = ['http://localhost:3000',
-                      'http://yourapp.com'];
+                      'https://secret-woodland-36609.herokuapp.com'];                    
+
 app.use(cors({
   origin: function(origin, callback){
     // allow requests with no origin 
@@ -83,9 +84,11 @@ app.set('port', process.env.PORT || 5000);
 (async () => {
   try {
     await sequelize.authenticate();
+    // await sequelize.sync();
     console.log('Successfully connected to the database');
   } catch(error) {
-    console.log('Error occured connecting to the database: ', error);
+    console.log('Hey Erland, an error occured connecting to the database: ', error);
+    console.log('*********************************************************');
   }
 })();
 
@@ -95,4 +98,9 @@ sequelize.sync()
     const server = app.listen(app.get('port'), () => {
       console.log(`Express server is listening on port ${server.address().port}`);
     });
-  });
+  })
+  .catch(( error => {
+    console.log("Hey Erland, the following error occured:");
+    console.log(error);
+    console.log('****************************************');
+  }));
